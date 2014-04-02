@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+		<title>Page Title</title>
+		<style type="text/css" media="screen">
+			body{margin:0;overflow:hidden;background:#fff;font-size:.3em;background:#000}
+			a{float:left;position:absolute;text-transform:uppercase;color:#fff;;padding:2px 5px;text-decoration:none;background:#000;font-weight:bold}
+			.clear{clear:both}
+		</style>
+		<script src="js/moo.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript" charset="utf-8">
+			geraTudo = {
+				word:[],
+				position:[],
+				last:false,
+				newElement:false,
+				reset:0,
+				family:['Arial','Verdana'],
+				scala:0,
+				create:function(word){
+					this.word = word.split(' ');
+				},
+				getAleatoryWord: function(){
+				        return this.word[$random(0,this.word.length-1)];
+				},
+				wordCreate: function(){
+					this.newElement = document.createElement('a');
+					this.newElement.style.fontSize = $random(2,6)+"em";
+					this.newElement.style.color = '#'+$random(444444,999999);
+					this.newElement.style.fontFamily = this.family[$random(0,1)];
+					this.newElement.innerHTML = this.getAleatoryWord();
+					this.newElement.href = "#"+this.newElement.innerHTML;
+					
+					this.newElement = document.body.appendChild(this.newElement);
+					
+					x = 0;
+					y = 0;
+					
+					if(this.last)
+					{
+						y = parseInt(this.last.style.left) + this.last.offsetWidth;
+						if(this.position[y+1])
+							x = this.position[y+1].length;
+						
+					}
+					
+					if(this.reset > 2){
+						if(this.position[y+25])
+							x = this.position[y+25].length;
+						//else
+						//	x = x+30;
+						this.reset = 0;
+					}
+					
+					ey = y+this.newElement.offsetWidth;
+					ex = x+this.newElement.offsetHeight;
+					
+					ey2 = y+(this.newElement.offsetWidth/2);
+					ex2 = x+(this.newElement.offsetHeight/2);
+					
+					if(ey>window.innerWidth){
+						x = this.position[0].length;
+						y = 0;
+						ey = y+this.newElement.offsetWidth;
+						ex = x+this.newElement.offsetHeight;
+					}
+					
+					if(ex>window.innerHeight){
+						//this.newElement.style.display = 'none';	
+						$(this.newElement).destroy();
+						return true;
+					}
+					
+					this.newElement.style.top = x+"px";
+					this.newElement.style.left = y+"px";
+					
+					if(((!this.position[ey] || !this.position[ey][x]) && (!this.position[ey2] || !this.position[ey2][x]))){	
+						ry = y;
+						while(ry<=ey)
+						{
+							rx = x;
+							while(rx<=ex)
+							{
+								if(!this.position[ry])
+									this.position[ry] = [];
+								if(!this.position[ry][rx])
+									this.scala++;
+								this.position[ry][rx] = true;
+								rx++;
+							}
+							ry++;
+						}
+						
+						this.last = this.newElement;
+						this.newElement = false;
+						
+					}else{
+						this.reset++;
+						//this.newElement.style.display = 'none';	
+						$(this.newElement).destroy();	
+					}
+					
+					return false;
+				}
+			}
+		
+		
+			window.onload = function(){
+				geraTudo.create("RESERVATION OF RIGHTS AND OWNERSHIP Microsoft reserves all rights not expressly granted to you in this EULA The Software is protected by copyright and other intellectual property laws and treaties Microsoft or its suppliers own the title copyright and other intellectual property rights in the Software The Software is licensed not sold macaco aranha pato galinha vaca papagaio gaivota cachorro gato aranha lagarto tatu tucano marreco gafanhoto cigarra porco garça ave");
+				o = false;
+				p = 0;
+				while(p < 20){
+					if(geraTudo.wordCreate())
+						p++;
+				}
+				
+				console.info(window.innerWidth*window.innerHeight);
+				console.info(geraTudo.scala);
+			}
+		</script>
+	</head>
+	<body>
+	</body>
+</html>
