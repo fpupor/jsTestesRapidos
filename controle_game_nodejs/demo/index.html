@@ -1,0 +1,129 @@
+<html>
+	<head>
+		<script src="http://189.102.9.41:5791/socket.io/socket.io.js"></script>
+		<script src="lib/qrcode.js"></script>		
+	</head>
+	<body>
+		<span id="orientation"></span>
+		<angrybirds id="mouse" style="position:absolute;top:0;left:0;border:2px solid red;border-bottom:0;border-right:0;width:10px;height:10px;display:none"></angrybirds>
+		<script>
+			
+		var socket = io.connect('http://189.102.9.41:5791');
+		var code = Math.round(Math.random(1)*999999999999999);
+		var mouse = document.getElementById("mouse");
+		var dif = {x:0,y:0};
+		
+		var start = false;
+		var canvas;
+		
+		function create_qrcode(text, typeNumber, errorCorrectLevel, table) {
+			var qr = qrcode(typeNumber || 4, errorCorrectLevel || 'M');
+			qr.addData(text);
+			qr.make();
+			
+			return qr.createGif();
+		};
+		
+		function fireEvent(element,event,update){
+			
+			function updateEvent(evt, ppt){
+				for(var n in ppt)
+					evt[n] = ppt[n];
+				
+				return evt;
+			}
+			
+			if (document.createEventObject){
+				var evt = updateEvent(document.createEventObject(), update);
+				return element.fireEvent('on'+event,evt)
+			}
+			else{
+				var evt = document.createEvent("HTMLEvents");
+				evt.initEvent(event, true, true ); // event type,bubbling,cancelable
+				evt = updateEvent(evt, update);
+				return !element.dispatchEvent(evt);
+			}
+		}
+		
+		function moveMouse(e){
+			mouse.style.top = e.pageY+"px";
+			mouse.style.left = e.pageX+"px";
+		}
+		
+		socket.on('error', function(e){
+			console.log(e);
+		});
+		  
+		socket.on('gameclientSuccess', function (data) {
+			console.info("Controle adicionado");
+		  
+		  var orientationElement = document.getElementById("orientation");
+		  
+		  //mouse.style.display = "block";
+		  socket.on('orientation', function(e){
+		  	orientationElement.innerHTML = "X: "+e.x+" - Y: "+e.y+" - Z:"+e.z;
+			
+
+			canvas.style.webkitTransform = "rotate("+ e.gamma +"deg) rotate3d(1,0,0, "+ (e.beta*-1)+"deg)";
+			 canvas.style.transform = "rotate("+ e.gamma +"deg) rotate3d(1,0,0, "+ (e.beta*-1)+"deg)";
+		  });
+		  
+		  socket.on('control', function (data) {
+		  	if(!canvas){
+				canvas = document.getElementsByTagName('canvas');
+				
+				if(!canvas[0])
+				{
+					canvas = false;
+					return;
+				}
+				else
+				{
+					canvas = canvas[0];
+				}
+			};
+			
+			moveMouse(data);
+			
+			switch(data.type){
+				case "mousedown":
+				case "touchstart":
+					data.type = "mousedown";
+					dif.x = data.pageX;
+					dif.y = data.pageY;
+					data.pageX = currentAngry.x2D;
+					data.pageY = currentAngry.y2D;
+				break;
+				case "mousemove":
+				case "touchmove":
+					data.type = "mousemove";
+					data.pageX = (data.pageX - dif.x) + currentAngry.x2D;
+					data.pageY = (data.pageY - dif.y) + currentAngry.y2D;
+				break;
+				case "mouseup":
+				case "touchend":
+					data.type = "mouseup";
+				break;
+			}
+			
+			fireEvent(canvas, data.type, data);
+		  });
+		  
+		  var s = document.createElement('script');
+		      s.type='text/javascript';
+			  document.body.appendChild(s);
+			  s.src='angrybird.js';
+		});
+		
+		socket.emit('gameclient', code);
+		
+		var url = window.location.origin + "/demo/control.html#" + code;
+		
+		document.write("<a href='"+url+"' target='_blank'>"+create_qrcode(url)+"</a>");
+		
+		console.info(code);
+		
+		document.body.onmousemove = moveMouse;
+		</script>
+	</body>
+</html>

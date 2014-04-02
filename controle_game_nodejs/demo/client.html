@@ -1,0 +1,90 @@
+<html>
+	<head>
+		<script src="http://189.102.9.41:5791/socket.io/socket.io.js"></script>
+		<script src="lib/qrcode.js"></script>		
+	</head>
+	
+	<body>
+		<span id="pingsView" style="position:absolute;top:0;left:0;background:white"></span>
+		<script>
+		var socket = io.connect('http://189.102.9.41:5791');
+		var id = new Date().getTime();
+		var pings = 0;
+		var othersPongs = 0;
+		var pingsView = document.getElementById('pingsView');
+		
+		function ping(){
+			/*socket.emit("ping", {
+				id: id,
+				dt: new Date().getTime()
+			});*/
+			socket.emit("ping", id);
+		};
+		
+		socket.on('pong', function(client){
+			//if(client.id == id){
+			if(client == id){
+				//dif = client.dt - (new Date().getTime());
+				pings++;
+				ping();
+			}else
+				othersPongs++;// = client.dt - (new Date().getTime());
+		});
+		
+		ping();
+		
+		var context, canvas, body, next = 0, otherNext = 0;
+		
+		function createCanvas(){
+			body = document.body;
+			body .style.overflow = "hidden";
+			canvas = document.createElement('canvas');
+			canvas.setAttribute('width', 500);
+			canvas.setAttribute('height', 200);
+			canvas.setAttribute('id', 'grafico');
+		
+			body.appendChild(canvas);
+			
+			if(typeof G_vmlCanvasManager != 'undefined') {
+				canvas = G_vmlCanvasManager.initElement(canvas);
+			}
+			
+			context = canvas.getContext("2d");
+			
+			setInterval(redrawCanvas, 1000);
+		}
+		
+		function redrawCanvas(){
+			context.lineWidth = 1;
+			
+			context.beginPath();
+			var x = ++next * 5;
+			context.strokeStyle = "blue";
+			context.moveTo(x,100);
+			context.lineTo(x, 100 + ((pings/3000*100)*-1) );
+			
+			context.closePath();
+			context.stroke();
+			
+			context.beginPath();
+			
+			context.strokeStyle = "red";
+			context.moveTo(x,100);
+			context.lineTo(x, 100 + ((othersPongs/3000*100)));
+			
+			context.closePath();
+			context.stroke();
+			
+			
+			pingsView.innerHTML = ''+pings+' - '+othersPongs;
+			
+			if(next >= 500/5 ) next = 0;
+			
+			pings = 0;
+			othersPongs = 0;
+		}
+		
+		createCanvas();
+		</script>
+	</body>
+</html>

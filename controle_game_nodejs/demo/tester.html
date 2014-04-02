@@ -1,0 +1,30 @@
+<html>
+	<head>
+		
+	</head>
+	
+	<body>
+		<script>
+		var body = document.body;
+		var clients = 0;
+		
+		function addClient(){	
+			var iframe = document.createElement('iframe');
+				iframe.width = "500";
+				iframe.height = "200";
+				iframe.style.float = "left";
+				iframe.style.overflow = "hidden";
+				iframe.src = "client.html";
+				
+			body.appendChild(iframe);
+			
+			
+			document.getElementById('quantidade').innerHTML = '' + (++clients);
+			
+		}
+		</script>
+		
+		<span id="quantidade"></span>
+		<a href="#" onclick="addClient()">add client</a>
+	</body>
+</html>
